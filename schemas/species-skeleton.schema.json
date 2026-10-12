@@ -1,0 +1,1056 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lifeark.example/schemas/species-skeleton/0.2",
+  "title": "LifeArk 物種骨架卡（species skeleton card）0.2",
+  "description": "一個檔＝一個物種（或亞種）的標準成體骨架數據。只放證據：每個數字都帶來源。缺的欄位不要填估計值湊數，留空。名稱只用來辨識。 0.2（2026-10-08）：新增 body（體表量測）、posture（軸骨與帶骨的站姿角）、ratios（比例指數）三區；舊的 0.1 卡照樣有效。 Open version: field definitions only; how an engine turns these numbers into a skeleton is not described here.",
+  "type": "object",
+  "required": [
+    "format",
+    "taxon",
+    "plan"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "val": {
+      "description": "一個數值＋它的證據。單位由欄位名稱決定（_m 公尺、_kg 公斤、_deg 度）。",
+      "type": "object",
+      "required": [
+        "v",
+        "src",
+        "ref"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "v": {
+          "type": "number",
+          "description": "採用的值（依權威順序從 alt 選出）"
+        },
+        "src": {
+          "enum": [
+            "M",
+            "D",
+            "E"
+          ],
+          "description": "M＝文獻實測；D＝由實測推導或換算；E＝依解剖描述估計"
+        },
+        "ref": {
+          "type": "string",
+          "description": "來源 id（見 sources 欄）；D 可寫多個，以逗號分隔"
+        },
+        "def": {
+          "enum": [
+            "JC",
+            "GL",
+            "SKIN",
+            "TL",
+            "SVL",
+            "SCL",
+            "CCL",
+            "DW",
+            "SRC",
+            "NA"
+          ],
+          "description": "Measurement definition code (required for lengths). JC = joint centre to joint centre; GL = greatest length of the bone (von den Driesch 1976); SKIN = measured on the body surface; TL = total length (tip to tip, tail included); SVL = snout-vent length; SCL = straight carapace length; CCL = curved carapace length; DW = disc width; SRC = the source's own definition, written out in def_note; NA = not a length (mass, angle, ratio, count). Free text goes in def_note."
+        },
+        "n": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "樣本數"
+        },
+        "sex": {
+          "enum": [
+            "pooled",
+            "male",
+            "female",
+            "unknown"
+          ]
+        },
+        "basis": {
+          "type": "string",
+          "description": "換算紀錄：換算前的值、換算依據"
+        },
+        "note": {
+          "type": "string"
+        },
+        "by": {
+          "type": "string",
+          "description": "誰填的：agent:<名字> 或 user:<id>"
+        },
+        "review": {
+          "enum": [
+            "pending",
+            "approved",
+            "rejected"
+          ],
+          "default": "pending"
+        },
+        "alt": {
+          "type": "array",
+          "description": "其他來源的值（同樣格式、不含 alt），保留不丟",
+          "items": {
+            "type": "object"
+          }
+        },
+        "def_note": {
+          "type": "string",
+          "description": "Free-text detail for def: landmarks, the source's wording, caveats. Write new text in English."
+        },
+        "min": {
+          "type": "number",
+          "description": "Lower bound when the source gives a range; v stays the midpoint."
+        },
+        "max": {
+          "type": "number",
+          "description": "Upper bound when the source gives a range; v stays the midpoint."
+        },
+        "grade": {
+          "enum": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "E"
+          ],
+          "description": "Evidence grade . A = measured in a peer-reviewed paper or published specimen dataset; B = derived from such data, or a specialist/institutional compilation; C = curated aggregate database or handbook without per-value provenance; D = popular or encyclopedic source (Wikipedia, zoo/park page, news): NOT authoritative, flagged; E = weak, unsourced or inferred: NOT authoritative, flagged. Grades D and E must be shown with a warning in the UI."
+        },
+        "male": {
+          "type": "number",
+          "description": "mean for males (same unit as v), when the source reports sexes separately"
+        },
+        "female": {
+          "type": "number",
+          "description": "mean for females (same unit as v), when the source reports sexes separately"
+        }
+      }
+    },
+    "count": {
+      "type": "object",
+      "required": [
+        "v",
+        "src",
+        "ref"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "v": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "src": {
+          "enum": [
+            "M",
+            "D",
+            "E"
+          ]
+        },
+        "ref": {
+          "type": "string"
+        },
+        "note": {
+          "type": "string"
+        },
+        "by": {
+          "type": "string"
+        },
+        "review": {
+          "enum": [
+            "pending",
+            "approved",
+            "rejected"
+          ]
+        },
+        "alt": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "min": {
+          "type": "number"
+        },
+        "max": {
+          "type": "number"
+        },
+        "grade": {
+          "enum": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "E"
+          ],
+          "description": "Evidence grade . A = measured in a peer-reviewed paper or published specimen dataset; B = derived from such data, or a specialist/institutional compilation; C = curated aggregate database or handbook without per-value provenance; D = popular or encyclopedic source (Wikipedia, zoo/park page, news): NOT authoritative, flagged; E = weak, unsourced or inferred: NOT authoritative, flagged. Grades D and E must be shown with a warning in the UI."
+        },
+        "n": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "樣本數"
+        },
+        "basis": {
+          "type": "string",
+          "description": "換算紀錄：換算前的值、換算依據"
+        },
+        "sex": {
+          "enum": [
+            "pooled",
+            "male",
+            "female",
+            "unknown"
+          ]
+        },
+        "def": {
+          "enum": [
+            "JC",
+            "GL",
+            "SKIN",
+            "TL",
+            "SVL",
+            "SCL",
+            "CCL",
+            "DW",
+            "SRC",
+            "NA"
+          ],
+          "description": "Measurement definition code (required for lengths). JC = joint centre to joint centre; GL = greatest length of the bone (von den Driesch 1976); SKIN = measured on the body surface; TL = total length (tip to tip, tail included); SVL = snout-vent length; SCL = straight carapace length; CCL = curved carapace length; DW = disc width; SRC = the source's own definition, written out in def_note; NA = not a length (mass, angle, ratio, count). Free text goes in def_note."
+        },
+        "def_note": {
+          "type": "string",
+          "description": "Free-text detail for def: landmarks, the source's wording, caveats. Write new text in English."
+        }
+      }
+    },
+    "segment": {
+      "type": "object",
+      "required": [
+        "key"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "enum": [
+            "scapula",
+            "humerus",
+            "antebrachium",
+            "metacarpus",
+            "manus_digit",
+            "pelvis",
+            "femur",
+            "crus",
+            "metatarsus",
+            "pes_digit",
+            "wing_phalanx_1",
+            "wing_phalanx_2",
+            "wing_phalanx_3",
+            "wing_phalanx_4",
+            "wing_digit_3",
+            "wing_digit_4",
+            "wing_digit_5",
+            "primary_feather"
+          ],
+          "description": "同源詞彙，跨綱通用。鳥：crus＝脛跗骨、metatarsus＝跗蹠骨、antebrachium＝尺骨、metacarpus＝腕掌骨。digit＝最長的承重趾，各節趾骨合計 Wing extras (fantasy donors): wing_phalanx_1-4 = pterosaur wing finger phalanges, wing_digit_3-5 = bat digits III-V (sum of metacarpal+phalanges), primary_feather = longest primary feather."
+        },
+        "len_m": {
+          "$ref": "#/$defs/val"
+        },
+        "mass_kg": {
+          "$ref": "#/$defs/val"
+        }
+      }
+    },
+    "joint": {
+      "type": "object",
+      "required": [
+        "key"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "enum": [
+            "shoulder",
+            "elbow",
+            "carpus",
+            "mcp",
+            "hip",
+            "stifle",
+            "tarsus",
+            "mtp"
+          ],
+          "description": "關節名稱（標準解剖名）"
+        },
+        "stand_deg": {
+          "$ref": "#/$defs/val",
+          "description": "站姿角。180＝伸直"
+        },
+        "rom_min_deg": {
+          "$ref": "#/$defs/val"
+        },
+        "rom_max_deg": {
+          "$ref": "#/$defs/val"
+        },
+        "rom_u": {
+          "type": "string",
+          "description": "量角的參考方向"
+        },
+        "rom_side": {
+          "enum": [
+            "cranial",
+            "caudal",
+            "ventral"
+          ]
+        }
+      }
+    },
+    "limb": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "segments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/segment"
+          }
+        },
+        "joints": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/joint"
+          }
+        }
+      }
+    }
+  },
+  "properties": {
+    "format": {
+      "enum": [
+        "lifeark.skeleton/0.1",
+        "lifeark.skeleton/0.2"
+      ]
+    },
+    "taxon": {
+      "type": "object",
+      "required": [
+        "key",
+        "sci",
+        "rank",
+        "lineage"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "type": "string",
+          "pattern": "^(gbif:[0-9]+|ugc:[a-z0-9_]+)$",
+          "description": "主鍵。有 GBIF Backbone 的用 gbif:<taxonKey>；GBIF 沒有的才用 ugc:<名稱>"
+        },
+        "sci": {
+          "type": "string",
+          "description": "學名（照 GBIF 接受名）"
+        },
+        "rank": {
+          "enum": [
+            "species",
+            "subspecies",
+            "breed"
+          ]
+        },
+        "lineage": {
+          "type": "object",
+          "required": [
+            "class",
+            "order",
+            "family",
+            "genus"
+          ],
+          "properties": {
+            "class": {
+              "type": "string"
+            },
+            "order": {
+              "type": "string"
+            },
+            "family": {
+              "type": "string"
+            },
+            "genus": {
+              "type": "string"
+            }
+          }
+        },
+        "names": {
+          "type": "object",
+          "description": "只用來辨識（文字查詢、歧義判斷）。含俗名、異名、常見錯字",
+          "properties": {
+            "zh": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "en": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "syn": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "學名異名"
+            }
+          }
+        },
+        "extinct": {
+          "type": "boolean",
+          "description": "Fossil species (true). Specimen numbers go in value basis."
+        },
+        "parent_key": {
+          "type": "string",
+          "pattern": "^(gbif:[0-9]+|ugc:[a-z0-9_]+)$",
+          "description": "Subspecies cards: key of the parent species card."
+        },
+        "taxonomy_note": {
+          "type": "string",
+          "description": "Which taxonomy the subspecies follows and known disagreements between authorities."
+        },
+        "display_name": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "en",
+            "zh"
+          ],
+          "description": "The name to show: explicit and unique in the library (no vague or shared names). Common name when one exists, otherwise the scientific name (en) or species name + subspecies epithet (zh). basis says where each came from.",
+          "properties": {
+            "en": {
+              "type": "string"
+            },
+            "zh": {
+              "type": "string"
+            },
+            "basis": {
+              "type": "object",
+              "properties": {
+                "en": {
+                  "type": "string"
+                },
+                "zh": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "wikidata": {
+          "type": "string",
+          "pattern": "^Q[0-9]+$",
+          "description": "Wikidata item of this taxon (via GBIF taxon ID, P846)"
+        },
+        "subspecies_keys": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Subspecies cards of this species (show these when a specific animal is meant)"
+        },
+        "treatments": {
+          "type": "array",
+          "description": "Taxonomic treatments by authority; first = the one the card follows, the rest are sourced alternatives",
+          "items": {
+            "type": "object",
+            "properties": {
+              "authority": {
+                "type": [
+                  "string",
+                  "integer"
+                ]
+              },
+              "year": {
+                "type": [
+                  "string",
+                  "integer"
+                ]
+              },
+              "treatment": {
+                "type": [
+                  "string",
+                  "integer"
+                ]
+              },
+              "rank": {
+                "type": [
+                  "string",
+                  "integer"
+                ]
+              },
+              "accepted_name": {
+                "type": [
+                  "string",
+                  "integer"
+                ]
+              },
+              "note": {
+                "type": [
+                  "string",
+                  "integer"
+                ]
+              },
+              "url": {
+                "type": [
+                  "string",
+                  "integer"
+                ]
+              }
+            }
+          }
+        },
+        "subspecies_support": {
+          "type": "object",
+          "properties": {
+            "level": {
+              "enum": [
+                "strong",
+                "moderate",
+                "weak",
+                "contested"
+              ]
+            },
+            "basis": {
+              "type": "string"
+            },
+            "refs": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "checklist_status": {
+          "type": "object",
+          "description": "Subspecies cross-check against the major checklists (CoL 2024 / MDD 2.4 via Guedes et al. 2026).",
+          "properties": {
+            "status": {
+              "enum": [
+                "valid",
+                "invalid",
+                "not listed",
+                "species not matched"
+              ]
+            },
+            "source": {
+              "type": "string"
+            },
+            "note": {
+              "type": "string"
+            },
+            "checked": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "plan": {
+      "description": "結構（拓樸）：有哪些部位、各幾個。",
+      "type": "object",
+      "required": [
+        "posture"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "posture": {
+          "enum": [
+            "quadruped",
+            "biped",
+            "serpentine",
+            "fish",
+            "avian",
+            "flipper",
+            "flight_mammal",
+            "pterosaur"
+          ]
+        },
+        "gait": {
+          "type": "object",
+          "description": "前（F）／後（B）的著地方式",
+          "properties": {
+            "F": {
+              "enum": [
+                "plantigrade",
+                "digitigrade",
+                "unguligrade",
+                "none"
+              ]
+            },
+            "B": {
+              "enum": [
+                "plantigrade",
+                "digitigrade",
+                "unguligrade",
+                "none"
+              ]
+            }
+          }
+        },
+        "limbs": {
+          "type": "object",
+          "properties": {
+            "F": {
+              "enum": [
+                "leg",
+                "arm",
+                "wing",
+                "flipper",
+                "fin",
+                "none"
+              ]
+            },
+            "B": {
+              "enum": [
+                "leg",
+                "flipper",
+                "fin",
+                "none"
+              ]
+            }
+          }
+        },
+        "digits": {
+          "type": "object",
+          "description": "承重趾數",
+          "properties": {
+            "F": {
+              "type": "integer"
+            },
+            "B": {
+              "type": "integer"
+            }
+          }
+        },
+        "vert": {
+          "type": "object",
+          "description": "椎骨數",
+          "properties": {
+            "C": {
+              "$ref": "#/$defs/count"
+            },
+            "T": {
+              "$ref": "#/$defs/count"
+            },
+            "L": {
+              "$ref": "#/$defs/count"
+            },
+            "S": {
+              "$ref": "#/$defs/count"
+            },
+            "Cd": {
+              "$ref": "#/$defs/count"
+            }
+          }
+        }
+      }
+    },
+    "standard": {
+      "type": "object",
+      "description": "這張卡代表的標準個體。預設：成體、雌雄合併平均",
+      "properties": {
+        "stage": {
+          "const": "adult"
+        },
+        "sex": {
+          "enum": [
+            "pooled",
+            "male",
+            "female"
+          ]
+        }
+      }
+    },
+    "size": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mass_kg": {
+          "$ref": "#/$defs/val"
+        },
+        "shoulder_h_m": {
+          "$ref": "#/$defs/val",
+          "description": "肩高（鬐甲高），地面到鬐甲最高點"
+        },
+        "hip_h_m": {
+          "$ref": "#/$defs/val"
+        },
+        "head_body_m": {
+          "$ref": "#/$defs/val",
+          "description": "頭體長（不含尾），體表"
+        },
+        "tail_m": {
+          "$ref": "#/$defs/val",
+          "description": "尾長，體表"
+        },
+        "wingspan_m": {
+          "$ref": "#/$defs/val"
+        },
+        "total_len_m": {
+          "$ref": "#/$defs/val",
+          "description": "魚、蛇：全長"
+        },
+        "hind_foot_m": {
+          "$ref": "#/$defs/val",
+          "description": "hind foot length (external, museum convention)"
+        },
+        "ear_m": {
+          "$ref": "#/$defs/val",
+          "description": "ear length from notch"
+        },
+        "standard_length_m": {
+          "$ref": "#/$defs/val",
+          "description": "standard length (fish)"
+        },
+        "fork_length_m": {
+          "$ref": "#/$defs/val",
+          "description": "fork length (fish)"
+        }
+      }
+    },
+    "axial": {
+      "type": "object",
+      "description": "軸骨各區長度。沿脊椎曲線、區交界的椎間盤中心到中心（JC）",
+      "additionalProperties": false,
+      "properties": {
+        "skull_m": {
+          "$ref": "#/$defs/val",
+          "description": "頭骨全長；def 寫清楚地標（例：枕骨最高點到門齒前端）"
+        },
+        "neck_m": {
+          "$ref": "#/$defs/val",
+          "description": "寰枕關節 → C|T 交界"
+        },
+        "thorax_m": {
+          "$ref": "#/$defs/val",
+          "description": "C|T → T|L"
+        },
+        "lumbar_m": {
+          "$ref": "#/$defs/val",
+          "description": "T|L → L|S"
+        },
+        "sacrum_m": {
+          "$ref": "#/$defs/val",
+          "description": "L|S → S|Cd"
+        },
+        "tail_m": {
+          "$ref": "#/$defs/val",
+          "description": "S|Cd → 最後一節尾椎末端（骨，不是體表尾長）"
+        }
+      }
+    },
+    "limbs": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "F": {
+          "$ref": "#/$defs/limb"
+        },
+        "B": {
+          "$ref": "#/$defs/limb"
+        }
+      }
+    },
+    "detail": {
+      "type": "string",
+      "description": "（選填）逐骨的詳細骨架檔"
+    },
+    "ext": {
+      "type": "object",
+      "description": "擴充欄位：新的量測先放這裡"
+    },
+    "meta": {
+      "type": "object",
+      "properties": {
+        "created": {
+          "type": "string"
+        },
+        "updated": {
+          "type": "string"
+        },
+        "by": {
+          "type": "string"
+        },
+        "note": {
+          "type": "string"
+        },
+        "gaps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Field paths with no usable source (left empty on purpose)."
+        }
+      }
+    },
+    "body": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "體表量測（def 一律 SKIN；地標照欄位說明）。家畜的體型測量（conformation／biometry）論文最常有這些。",
+      "properties": {
+        "body_len_m": {
+          "$ref": "#/$defs/val",
+          "description": "體長：肩端（肱骨大結節前緣）→ 臀端（坐骨結節後緣），水平或斜線照來源寫在 def"
+        },
+        "chest_depth_m": {
+          "$ref": "#/$defs/val",
+          "description": "胸深：鬐甲最高點 → 胸骨下緣（垂直）"
+        },
+        "chest_width_m": {
+          "$ref": "#/$defs/val",
+          "description": "胸寬：左右肩端之間"
+        },
+        "hip_width_m": {
+          "$ref": "#/$defs/val",
+          "description": "腰角寬：左右髖結節之間"
+        },
+        "croup_len_m": {
+          "$ref": "#/$defs/val",
+          "description": "尻長：髖結節 → 坐骨結節"
+        },
+        "neck_len_m": {
+          "$ref": "#/$defs/val",
+          "description": "頸長：項（枕骨後）→ 肩端或鬐甲前緣；def 寫清楚到哪"
+        },
+        "head_len_m": {
+          "$ref": "#/$defs/val",
+          "description": "頭長：項 → 吻端（皮膚）"
+        },
+        "back_h_m": {
+          "$ref": "#/$defs/val",
+          "description": "背高：最低點（鞍部）到地面"
+        },
+        "elbow_h_m": {
+          "$ref": "#/$defs/val",
+          "description": "肘高：鷹嘴到地面"
+        },
+        "cannon_circ_m": {
+          "$ref": "#/$defs/val",
+          "description": "管圍：前管骨最細處周長"
+        }
+      }
+    },
+    "posture": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "站立時軸骨、帶骨的角度。一律量「線段跟水平面的夾角」，往前上方為正、往前下方為負，單位度。只收文獻的站立量測（X 光、站姿運動學、體型測量）；照片、雕像、標本的姿勢不收。",
+      "properties": {
+        "head_deg": {
+          "$ref": "#/$defs/val",
+          "description": "頭骨長軸（寰枕關節 → 吻端／門齒前端）跟水平的夾角；頭朝下為負"
+        },
+        "neck_deg": {
+          "$ref": "#/$defs/val",
+          "description": "頸：C7|T1 → 寰枕關節 的連線跟水平的夾角；抬頭為正"
+        },
+        "thorax_deg": {
+          "$ref": "#/$defs/val",
+          "description": "胸椎：T|L → C7|T1 的連線跟水平的夾角"
+        },
+        "lumbar_deg": {
+          "$ref": "#/$defs/val",
+          "description": "腰椎：L|S → T|L 的連線跟水平的夾角"
+        },
+        "pelvis_deg": {
+          "$ref": "#/$defs/val",
+          "description": "骨盆：坐骨結節 → 髖結節 的連線跟水平的夾角（尻角）"
+        },
+        "tail_base_deg": {
+          "$ref": "#/$defs/val",
+          "description": "尾根：S|Cd → 第 5 尾椎 的連線跟水平的夾角；下垂為負"
+        },
+        "scapula_deg": {
+          "$ref": "#/$defs/val",
+          "description": "肩胛棘：肩關節 → 肩胛上緣 的連線跟水平的夾角"
+        },
+        "acetabulum_frac": {
+          "$ref": "#/$defs/val",
+          "description": "髖臼在骨盆上的位置：髖結節 → 坐骨結節 的比例（0＝髖結節）"
+        }
+      }
+    },
+    "ratios": {
+      "type": "object",
+      "description": "無單位的比例指數。文獻常只給比例不給絕對長度，照收。名稱用下列標準名；其他比例用 <分子>_over_<分母>（欄位名用骨架卡的 key）。",
+      "properties": {
+        "intermembral": {
+          "$ref": "#/$defs/val",
+          "description": "(humerus+radius)/(femur+tibia)，GL"
+        },
+        "brachial": {
+          "$ref": "#/$defs/val",
+          "description": "radius/humerus"
+        },
+        "crural": {
+          "$ref": "#/$defs/val",
+          "description": "tibia/femur"
+        },
+        "skull_over_head_body": {
+          "$ref": "#/$defs/val"
+        },
+        "tail_over_head_body": {
+          "$ref": "#/$defs/val"
+        }
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/val"
+      }
+    },
+    "appendages": {
+      "type": "array",
+      "description": "Horns, tusks, antlers, sails, plates, frills, tail clubs (fantasy donor data).",
+      "items": {
+        "type": "object",
+        "required": [
+          "kind"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "enum": [
+              "horn",
+              "tusk",
+              "antler",
+              "sail",
+              "plate",
+              "frill",
+              "club"
+            ]
+          },
+          "side": {
+            "enum": [
+              "paired",
+              "single",
+              "L",
+              "R"
+            ]
+          },
+          "len_m": {
+            "$ref": "#/$defs/val"
+          },
+          "chord_m": {
+            "$ref": "#/$defs/val"
+          },
+          "base_d_m": {
+            "$ref": "#/$defs/val"
+          },
+          "span_m": {
+            "$ref": "#/$defs/val"
+          },
+          "height_m": {
+            "$ref": "#/$defs/val"
+          },
+          "count": {
+            "$ref": "#/$defs/val"
+          },
+          "angle_deg": {
+            "$ref": "#/$defs/val"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "reality": {
+      "enum": [
+        "real",
+        "fantasy"
+      ],
+      "description": "real = an animal that exists or existed (living, extinct or fossil); fantasy = a creature from folklore or fiction (fantasy/ cards)."
+    },
+    "distribution": {
+      "type": "object",
+      "description": "Where the species occurs or occurred on Earth: several record sites (lat/lon), biogeographic realms (WWF 2017), biomes, ecoregions, IHO sea areas, climate zones, distribution pattern terms; for fossils formations, intervals and paleo-coordinates. See the import tool.",
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "pattern": {
+          "type": "array"
+        },
+        "biogeographic_realms": {
+          "type": "array"
+        },
+        "biomes": {
+          "type": "array"
+        },
+        "marine_areas": {
+          "type": "array"
+        },
+        "climate_zones": {
+          "type": "array"
+        },
+        "lat_range_deg": {
+          "type": "array"
+        },
+        "lon_range_deg": {
+          "type": "array"
+        },
+        "extent_text": {
+          "type": "string"
+        },
+        "n_records": {},
+        "n_countries": {},
+        "sites": {
+          "type": "array",
+          "minItems": 1
+        },
+        "basis": {
+          "type": "string"
+        },
+        "ref": {
+          "type": "array"
+        },
+        "grade": {
+          "enum": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "E"
+          ]
+        },
+        "retrieved": {
+          "type": "string"
+        },
+        "by": {
+          "type": "string"
+        },
+        "review": {
+          "type": "string"
+        }
+      }
+    },
+    "age": {
+      "type": "object",
+      "description": "Geologic time range of the species (real animals only): first and last appearance in the fossil record (PBDB), interval names, Ma, epoch/period/era; living species last appearance = present."
+    },
+    "nomenclature": {
+      "type": "object",
+      "description": "ICZN-style name record: scientific_name_authorship (Darwin Core scientificNameAuthorship), name_with_authorship, original_combination, published_in (namePublishedIn), taxonomic_status, nomenclatural_status, GBIF/PBDB ids."
+    },
+    "type_specimen": {
+      "type": "object",
+      "description": "Name-bearing type (Darwin Core typeStatus/catalogNumber/institution): kind (holotype, lectotype, neotype, syntypes), catalog_number, institution, type_locality, type_horizon, designated_in, ref, grade."
+    },
+    "dating": {
+      "type": "array",
+      "description": "How the age is known: per unit the dating method (U-Pb, 40Ar/39Ar, radiocarbon, biostratigraphy, magnetostratigraphy, historical record), age with error and unit, what was dated, lab code and calibration for radiocarbon, ref, grade."
+    },
+    "conservation": {
+      "type": "object",
+      "description": "IUCN Red List category (code, category, IUCN taxon id) as served by GBIF."
+    },
+    "ecology": {
+      "type": "object",
+      "description": "PBDB ecospace attributes (environment, life habit, diet, motility, reproduction); often inherited from a higher taxon."
+    }
+  }
+}

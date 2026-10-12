@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lifeark.example/schemas/dataset-manifest/0.1",
+  "title": "LifeArk dataset manifest 0.1",
+  "description": "Describes a delivered synthetic gait dataset, returned by GET /api/datasets/{dataset_id}.",
+  "type": "object",
+  "required": ["dataset_id", "order_id", "created", "subjects", "files", "licence"],
+  "additionalProperties": false,
+  "properties": {
+    "dataset_id": { "type": "string" },
+    "order_id": { "type": "string" },
+    "created": { "type": "string", "format": "date-time" },
+    "engine_version": { "type": "string", "description": "Version of the generation engine that produced the files." },
+    "subjects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["subject", "seed_records"],
+        "additionalProperties": false,
+        "properties": {
+          "subject": { "type": "string", "description": "Species name or body-type label from the order." },
+          "seed_records": {
+            "type": "array",
+            "description": "Verified records used as seeds, with their source grades, so every dataset is traceable to its evidence.",
+            "items": {
+              "type": "object",
+              "required": ["record_id", "grade"],
+              "additionalProperties": false,
+              "properties": {
+                "record_id": { "type": "string" },
+                "grade": { "enum": ["A", "B", "C", "D", "E"] }
+              }
+            }
+          },
+          "episodes": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "files": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["path", "kind", "bytes", "sha256"],
+        "additionalProperties": false,
+        "properties": {
+          "path": { "type": "string" },
+          "kind": { "enum": ["gait_reference", "trajectories", "physics_model", "parameter_ranges", "readme"] },
+          "format": { "enum": ["mjcf", "urdf", "csv", "npz", "json", "md"] },
+          "bytes": { "type": "integer", "minimum": 0 },
+          "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+          "url": { "type": "string", "format": "uri", "description": "Time-limited download link." }
+        }
+      }
+    },
+    "licence": { "type": "string", "description": "Licence granted to the customer under the order's agreement." }
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lifeark.example/schemas/order/0.1",
+  "title": "LifeArk dataset order 0.1",
+  "description": "What a customer sends to POST /api/orders to request a synthetic gait dataset.",
+  "type": "object",
+  "required": ["subjects", "outputs", "volume"],
+  "additionalProperties": false,
+  "properties": {
+    "subjects": {
+      "description": "Which bodies to simulate: named species, or a body type described by its proportions.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": ["species"],
+            "additionalProperties": false,
+            "properties": {
+              "species": { "type": "string", "description": "Scientific name, e.g. 'Capra ibex'." },
+              "scale": { "type": "number", "exclusiveMinimum": 0, "description": "Optional uniform size factor relative to the adult reference." }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["body_type"],
+            "additionalProperties": false,
+            "properties": {
+              "body_type": { "enum": ["biped", "quadruped", "other"] },
+              "mass_kg": { "type": "number", "exclusiveMinimum": 0 },
+              "leg_length_m": { "type": "number", "exclusiveMinimum": 0 },
+              "notes": { "type": "string" }
+            }
+          }
+        ]
+      }
+    },
+    "terrain": {
+      "description": "Conditions to vary during generation.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "surface": { "type": "array", "items": { "enum": ["flat", "slope", "steps", "rubble", "soft"] } },
+        "slope_deg": { "$ref": "#/$defs/range" },
+        "friction": { "$ref": "#/$defs/range" }
+      }
+    },
+    "gaits": {
+      "description": "Gaits to include; empty means all gaits the body supports.",
+      "type": "array",
+      "items": { "enum": ["stand", "walk", "trot", "pace", "canter", "gallop", "bound", "hop", "turn"] }
+    },
+    "outputs": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "enum": ["gait_reference", "trajectories", "physics_model", "parameter_ranges"] }
+    },
+    "format": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "model": { "enum": ["mjcf", "urdf"], "default": "mjcf" },
+        "series": { "enum": ["csv", "npz"], "default": "npz" },
+        "rate_hz": { "type": "integer", "minimum": 10, "maximum": 1000, "default": 100 }
+      }
+    },
+    "volume": {
+      "type": "object",
+      "required": ["episodes"],
+      "additionalProperties": false,
+      "properties": {
+        "episodes": { "type": "integer", "minimum": 1, "description": "Number of generated sequences per subject." },
+        "seconds_per_episode": { "type": "number", "exclusiveMinimum": 0, "default": 10 }
+      }
+    }
+  },
+  "$defs": {
+    "range": {
+      "type": "object",
+      "required": ["min", "max"],
+      "additionalProperties": false,
+      "properties": { "min": { "type": "number" }, "max": { "type": "number" } }
+    }
+  }
+}
